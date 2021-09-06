@@ -9,7 +9,7 @@ Lexer * current = nullptr;
 void set_token_info() {
     current->text << yytext;
     current->line_end = current->line_start;
-    current->col_end = current->col_start + strlen(yytext);
+    current->col_end = current->col_start + yyleng;
 }
 %}
 
