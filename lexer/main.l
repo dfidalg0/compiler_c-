@@ -94,6 +94,10 @@ delimiter   (\(|\)|\{|\}|\[|\])
 
 Lexer::Lexer(std::string filename) {
     this->file = fopen(filename.c_str(), "r");
+    if(this->file == nullptr){
+        std::cout << "File not found " << filename << std::endl;
+        exit(1);
+    }
     this->state = INITIAL;
     this->line_start = this->col_start = this->line_end = this->col_end = 1;
 }
@@ -131,8 +135,14 @@ Token Lexer::lex() {
     return token;
 }
 
-int main() {
-    auto lexer = Lexer("./examples/sort.c");
+int main(int argc, char **argv) {
+    
+    if(argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
+        exit(1);
+    }
+
+    auto lexer = Lexer(argv[1]);
 
     auto token = lexer.lex();
 
