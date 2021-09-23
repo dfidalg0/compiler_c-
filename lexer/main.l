@@ -2,8 +2,6 @@
 #include <iostream>
 #include <lexer.h>
 
-extern "C" int yylex();
-
 Lexer * current = nullptr;
 
 void set_token_info() {
@@ -63,7 +61,7 @@ delimiter   (\(|\)|\{|\}|\[|\])
 
 {number} {
     set_token_info();
-    return TokenType::IDENTIFIER;
+    return TokenType::NUMBER;
 }
 
 {operator} {
@@ -104,28 +102,7 @@ int main(int argc, char **argv) {
     auto token = lexer.lex();
 
     while (token.type() != TokenType::END_OF_FILE) {
-        std::string types[] = {
-            "keyword",
-            "identifier",
-            "number",
-            "operator",
-            "separator",
-            "delimiter",
-            "comment",
-            "invalid"
-        };
-
-        auto type  = types[token.type()];
-        auto text  = token.text();
-        auto begin = token.begin();
-        auto end   = token.end();
-
-        std::cout
-            << "Type: "  << type         << '\n'
-            << "Begin: " << begin.line() << ':'    << begin.col() << '\n'
-            << "End: "   << end.line()   << ':'    << end.col()   << '\n'
-            << "Text: "  << text         << "\n\n";
-
+        token.print_token();
         token = lexer.lex();
     }
 
