@@ -35,8 +35,12 @@ TokenType Token::type() { return _type; }
 void Token::print_token(){
     if(_type == COMMENT) return;
 
-    std::cout << _begin.line() << ", " << _begin.col()
-              << "-" << _end.col() << ": " << types[_type];
+    std::cout
+        << "(" << _begin.line() << "," << _begin.col() << ")"
+        << ":"
+        << "(" << _end.line() << "," <<_end.col() << ") - "
+        << types[_type];
+
     switch(_type){
         case OPERATOR:
         case SEPARATOR:
