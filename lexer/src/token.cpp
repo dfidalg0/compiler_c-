@@ -4,10 +4,16 @@
 std::string types[] = {
             "keyword",
             "identifier",
+            "malformed_identifier",
             "number",
             "operator",
             "separator",
-            "delimiter",
+            "left_parenthesis",
+            "right_parenthesis",
+            "left_bracket",
+            "right_bracket",
+            "left_braces",
+            "right_braces",
             "comment",
             "invalid"
 };
@@ -34,11 +40,17 @@ void Token::print_token(){
     switch(_type){
         case OPERATOR:
         case SEPARATOR:
-        case DELIMITER:
+        case LPAREN:
+        case RPAREN:
+        case LBRACK:
+        case RBRACK:
+        case LBRACE:
+        case RBRACE:
         case KEYWORD:
             std::cout << ", " << _text << std::endl;
             break;
         case IDENTIFIER:
+        case BADIDEN:
             std::cout << ", name = " << _text << std::endl;
             break;
         case NUMBER:

@@ -5,10 +5,16 @@ enum TokenType {
     END_OF_FILE = -1,
     KEYWORD,
     IDENTIFIER,
+    BADIDEN,
     NUMBER,
     OPERATOR,
     SEPARATOR,
-    DELIMITER,
+    LPAREN,
+    RPAREN,
+    LBRACK,
+    RBRACK,
+    LBRACE,
+    RBRACE,
     COMMENT,
     INVALID
 };

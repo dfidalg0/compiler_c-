@@ -13,12 +13,18 @@ void set_token_info() {
 
 %x READ_COMMENT
 
-keyword     (if|else|int|return|void|while)
-operator    (\+|\-|\*|\/|<|<=|>|>=|==|!=|=)
-separator   (;|,)
-identifier  [a-zA-Z]+
-number      [0-9]+
-delimiter   (\(|\)|\{|\}|\[|\])
+keyword           (if|else|int|return|void|while)
+operator          (\+|\-|\*|\/|<|<=|>|>=|==|!=|=)
+separator         (;|,)
+identifier        [a-zA-Z]+
+number            [0-9]+
+malformed_identifier ({number}{identifier})
+left_parenthesis  (\()
+right_parenthesis (\))
+left_bracket      (\[)
+right_bracket     (\])
+left_braces       (\{)
+right_braces      (\})
 
 %%
 "/*" {
@@ -59,6 +65,11 @@ delimiter   (\(|\)|\{|\}|\[|\])
     return TokenType::IDENTIFIER;
 }
 
+{malformed_identifier} {
+    set_token_info();
+    return TokenType::BADIDEN;
+}
+
 {number} {
     set_token_info();
     return TokenType::NUMBER;
@@ -74,9 +85,35 @@ delimiter   (\(|\)|\{|\}|\[|\])
     return TokenType::SEPARATOR;
 }
 
-{delimiter} {
+
+{left_parenthesis} {
     set_token_info();
-    return TokenType::DELIMITER;
+    return TokenType::LPAREN;
+}
+
+{right_parenthesis} {
+    set_token_info();
+    return TokenType::RPAREN;
+}
+
+{left_bracket} {
+    set_token_info();
+    return TokenType::LBRACK;
+}
+
+{right_bracket} {
+    set_token_info();
+    return TokenType::RBRACK;
+}
+
+{left_braces} {
+    set_token_info();
+    return TokenType::LBRACE;
+}
+
+{right_braces} {
+    set_token_info();
+    return TokenType::RBRACE;
 }
 
 \n          { current->line_start++; current->col_start = 1; }
