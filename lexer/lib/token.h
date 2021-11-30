@@ -17,7 +17,7 @@ public:
     Position begin();
     Position end();
     std::string text();
-    void print_token();
+    void print();
 };
 
 #endif // __TOKEN__

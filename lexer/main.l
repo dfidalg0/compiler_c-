@@ -9,45 +9,32 @@ void set_token_info() {
     current->line_end = current->line_start;
     current->col_end = current->col_start + yyleng;
 }
+
+#define MAKE_TOKEN($type) \
+    set_token_info(); \
+    return TokenType::$type;
 %}
 
 %x READ_COMMENT
 
-keyword           (if|else|int|return|void|while)
-operator          (\+|\-|\*|\/|<|<=|>|>=|==|!=|=)
-separator         (;|,)
-identifier        [a-zA-Z]+
-number            [0-9]+
-malformed_identifier ({number}{identifier})
-left_parenthesis  (\()
-right_parenthesis (\))
-left_bracket      (\[)
-right_bracket     (\])
-left_braces       (\{)
-right_braces      (\})
-
 %%
+
 "/*" {
     BEGIN(READ_COMMENT);
-    current->text << yytext;
+    current->col_start += 2;
 }
 
 <READ_COMMENT>.|\n {
-    current->text << yytext;
     if (yytext[0] == '\n') {
-        current->col_end = 1;
-        current->line_end++;
+        current->col_start = 1;
+        current->line_start++;
     }
-    else current->col_end++;
+    else current->col_start++;
 }
 
 <READ_COMMENT>"*/" {
-    current->text << yytext;
     BEGIN(INITIAL);
-
-    current->col_end += 2;
-
-    return TokenType::COMMENT;
+    current->col_start += 2;
 }
 
 <READ_COMMENT><<EOF>> {
@@ -55,80 +42,64 @@ right_braces      (\})
     return TokenType::INVALID;
 }
 
-{keyword} {
-    set_token_info();
-    return TokenType::KEYWORD;
-}
+if          { MAKE_TOKEN(IF); }
+else        { MAKE_TOKEN(ELSE); }
+int         { MAKE_TOKEN(INT); }
+return      { MAKE_TOKEN(RETURN); }
+void        { MAKE_TOKEN(VOID); }
+while       { MAKE_TOKEN(WHILE); }
 
-{identifier} {
-    set_token_info();
-    return TokenType::IDENTIFIER;
-}
+[a-zA-Z]+   { MAKE_TOKEN(IDENTIFIER); }
 
-{malformed_identifier} {
-    set_token_info();
-    return TokenType::BADIDEN;
-}
+[0-9]+      { MAKE_TOKEN(NUMBER); }
 
-{number} {
-    set_token_info();
-    return TokenType::NUMBER;
-}
+\+          { MAKE_TOKEN(ADD); }
 
-{operator} {
-    set_token_info();
-    return TokenType::OPERATOR;
-}
+\-          { MAKE_TOKEN(SUB); }
 
-{separator} {
-    set_token_info();
-    return TokenType::SEPARATOR;
-}
+\*          { MAKE_TOKEN(MUL); }
 
+\/          { MAKE_TOKEN(DIV); }
 
-{left_parenthesis} {
-    set_token_info();
-    return TokenType::LPAREN;
-}
+\<          { MAKE_TOKEN(LT); }
 
-{right_parenthesis} {
-    set_token_info();
-    return TokenType::RPAREN;
-}
+\<=         { MAKE_TOKEN(LTE); }
 
-{left_bracket} {
-    set_token_info();
-    return TokenType::LBRACK;
-}
+\>          { MAKE_TOKEN(GT); }
 
-{right_bracket} {
-    set_token_info();
-    return TokenType::RBRACK;
-}
+\>=         { MAKE_TOKEN(GTE); }
 
-{left_braces} {
-    set_token_info();
-    return TokenType::LBRACE;
-}
+==          { MAKE_TOKEN(EQ); }
 
-{right_braces} {
-    set_token_info();
-    return TokenType::RBRACE;
-}
+!=          { MAKE_TOKEN(NEQ); }
+
+=           { MAKE_TOKEN(ASSIGN); }
+
+\;          { MAKE_TOKEN(SEMI); }
+
+\,          { MAKE_TOKEN(COMMA); }
+
+\(          { MAKE_TOKEN(LPAREN); }
+
+\)          { MAKE_TOKEN(RPAREN); }
+
+\[          { MAKE_TOKEN(LBRACK); }
+
+\]          { MAKE_TOKEN(RBRACK); }
+
+\{          { MAKE_TOKEN(LBRACE); }
+
+\}          { MAKE_TOKEN(RBRACE); }
 
 \n          { current->line_start++; current->col_start = 1; }
 [[:space:]] { current->col_start++; }
 
 <<EOF>>     { return TokenType::END_OF_FILE; }
 
-. {
-    set_token_info();
-    return TokenType::INVALID;
-}
+.           { MAKE_TOKEN(INVALID); }
 %%
 
 int main(int argc, char **argv) {
-    
     if(argc != 2) {
         std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
         exit(1);
@@ -139,7 +110,7 @@ int main(int argc, char **argv) {
     auto token = lexer.lex();
 
     while (token.type() != TokenType::END_OF_FILE) {
-        token.print_token();
+        token.print();
         token = lexer.lex();
     }
 
