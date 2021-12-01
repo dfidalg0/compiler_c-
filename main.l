@@ -9,7 +9,7 @@ void set_token_info(yytokentype type) {
     line_end = line_start;
     col_end = col_start + yyleng;
 
-    yylval = new Token(
+    yylval.token = new Token(
         type,
         Position(line_start, col_start),
         Position(line_end,   col_end  ),

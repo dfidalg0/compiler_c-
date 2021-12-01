@@ -1,6 +1,7 @@
 // #include <token.hpp>
 #include <iostream>
 
+#include <token.hpp>
 #include <parser.yy.hpp>
 
 Token::Token(int type, Position begin, Position end, std::string text):
@@ -15,10 +16,8 @@ Position Token::end() { return _end; }
 
 std::string Token::text() { return _text; }
 
-int Token::type() { return _type; }
-
-void Token::print(){
-    static const std::string types[] = {
+std::string Token::name() {
+    static const std::string names[] = {
         "if",
         "else",
         "while",
@@ -45,15 +44,20 @@ void Token::print(){
         "left_braces",
         "right_braces",
         "comma",
-        "semicolon",
-        "invalid"
+        "semicolon"
     };
 
+    return names[_type - yytokentype::IF];
+}
+
+int Token::type() { return _type; }
+
+void Token::print(){
     std::cout
         << "(" << _begin.line() << "," << _begin.col() << ")"
         << ":"
         << "(" << _end.line() << "," << _end.col() << ") - "
-        << types[_type - yytokentype::IF];
+        << name();
 
     switch(_type){
         case IF:

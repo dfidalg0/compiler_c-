@@ -16,6 +16,7 @@ public:
     Position begin();
     Position end();
     std::string text();
+    std::string name();
     void print();
 };
 

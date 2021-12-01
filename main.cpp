@@ -1,31 +1,27 @@
 #include <iostream>
+#include <parser.yy.hpp>
 // #include <lexer.hpp>
 // #include <parse.hpp>
 // #include <util.hpp>
 
 // #define TYPE 1
 
+extern FILE * yyin;
+
 int main(int argc, char **argv) {
-    std::cout << "Hello, World!" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
+        return 1;
+    }
 
-    // if (argc != 2)
-    // {
-    //     std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
-    //     exit(1);
-    // }
+    yyin = fopen(argv[1], "r");
 
-    // if (TYPE == 1)
-    // {
-    //     auto lexer = Lexer(argv[1]);
+    auto type = yylex();
 
-    //     auto token = lexer.lex();
-
-    //     while (token.type() != yytokentype::YYEOF)
-    //     {
-    //         token.print();
-    //         token = lexer.lex();
-    //     }
-    // }
+    while (type != yytokentype::YYEOF) {
+        yylval.token->print();
+        type = yylex();
+    }
 
     return 0;
 }
