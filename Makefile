@@ -1,12 +1,12 @@
-all: lexer
+all: compiler
 
-lexer: bin/lex
+compiler: bin/compiler
 
-bin/lex: lexer/main.cpp lexer/src/*.cpp lexer/lib/*.h | bin
-	g++ -lfl -I lexer/lib lexer/main.cpp lexer/src/*.cpp -o bin/lex
+bin/compiler: main.cpp lexer/index.cpp lexer/src/*.cpp lexer/lib/*.h | bin
+	g++ -lfl -I lexer/lib main.cpp lexer/index.cpp lexer/src/*.cpp -o bin/compiler
 
-lexer/main.cpp: lexer/main.l
-	flex -o lexer/main.cpp lexer/main.l
+lexer/index.cpp: lexer/main.l
+	flex -o lexer/index.cpp lexer/main.l
 
 bin:
 	mkdir bin
