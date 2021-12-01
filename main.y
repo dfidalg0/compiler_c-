@@ -1,25 +1,36 @@
-%{
+%code requires {
+typedef class Token Token;
 
 #include <parse.hpp>
+#include <token.hpp>
 
-#define YYSTYPE TreeNode *
-static char * savedName;
-static int savedLineNo;
-static TreeNode * savedTree;
-// int yylex(void);
-int yyerror(char *s);
+extern "C" int yylex();
+}
+
+%{
+#include <iostream>
+// #include <lexer.hpp>
+// #define YYSTYPE TreeNode *
+// static char * savedName;
+// static int savedLineNo;
+// static TreeNode * savedTree;
+
+int yyerror(char const *);
 
 %}
+
+%define api.value.type { Token * }
 
 %token IF ELSE WHILE RETURN INT VOID
 %token IDENTIFIER NUMBER
 %token ASSIGN EQ NEQ LT LTE GT GTE ADD SUB MUL DIV
 %token LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE COMMA SEMI
-%token INVALID END_OF_FILE
 
 %%
 
-programa: declaracao_lista
+prog: IF
+
+/* programa: declaracao_lista
           { savedTree = $1; };
 
 declaracao_lista: declaracao_lista declaracao
@@ -140,6 +151,10 @@ ativacao: IDENTIFIER LPAREN args RPAREN;
 
 args: arg_lista | %empty;
 
-arg_lista: arg_lista COMMA expressao | expressao
+arg_lista: arg_lista COMMA expressao | expressao */
 
 %%
+int yyerror(char const * err) {
+    std::cerr << err << '\n' << std::endl;
+    return 0;
+};

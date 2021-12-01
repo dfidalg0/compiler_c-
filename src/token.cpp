@@ -1,9 +1,9 @@
-#include <token.hpp>
+// #include <token.hpp>
 #include <iostream>
 
 #include <parser.yy.hpp>
 
-Token::Token(yytokentype type, Position begin, Position end, std::string text):
+Token::Token(int type, Position begin, Position end, std::string text):
     _type(type),
     _begin(begin),
     _end(end),
@@ -15,7 +15,7 @@ Position Token::end() { return _end; }
 
 std::string Token::text() { return _text; }
 
-yytokentype Token::type() { return _type; }
+int Token::type() { return _type; }
 
 void Token::print(){
     static const std::string types[] = {
@@ -91,7 +91,7 @@ void Token::print(){
         case RBRACE:
             std::cout << ", " << _text << std::endl;
             break;
-        case INVALID:
+        case YYerror:
             std::cout << ": " << _text << std::endl;
             break;
     }

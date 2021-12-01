@@ -1,18 +1,27 @@
 %{
 #include <iostream>
-#include <lexer.hpp>
+#include <position.hpp>
 #include <parser.yy.hpp>
 
-Lexer * current = nullptr;
+int line_start = 1, line_end = 1, col_start = 1, col_end = 1;
 
-void set_token_info() {
-    current->text << yytext;
-    current->line_end = current->line_start;
-    current->col_end = current->col_start + yyleng;
+void set_token_info(yytokentype type) {
+    line_end = line_start;
+    col_end = col_start + yyleng;
+
+    yylval = new Token(
+        type,
+        Position(line_start, col_start),
+        Position(line_end,   col_end  ),
+        std::string(yytext)
+    );
+
+    line_start = line_end;
+    col_start = col_end;
 }
 
 #define MAKE_TOKEN($type) \
-    set_token_info(); \
+    set_token_info(yytokentype::$type); \
     return yytokentype::$type;
 %}
 
@@ -22,25 +31,25 @@ void set_token_info() {
 
 "/*" {
     BEGIN(READ_COMMENT);
-    current->col_start += 2;
+    col_start += 2;
 }
 
 <READ_COMMENT>.|\n {
     if (yytext[0] == '\n') {
-        current->col_start = 1;
-        current->line_start++;
+        col_start = 1;
+        line_start++;
     }
-    else current->col_start++;
+    else col_start++;
 }
 
 <READ_COMMENT>"*/" {
     BEGIN(INITIAL);
-    current->col_start += 2;
+    col_start += 2;
 }
 
 <READ_COMMENT><<EOF>> {
     BEGIN(INITIAL);
-    return yytokentype::INVALID;
+    return yytokentype::YYEOF;
 }
 
 if          { MAKE_TOKEN(IF); }
@@ -92,8 +101,8 @@ while       { MAKE_TOKEN(WHILE); }
 
 \}          { MAKE_TOKEN(RBRACE); }
 
-\n          { current->line_start++; current->col_start = 1; }
-[[:space:]] { current->col_start++; }
+\n          { line_start++; col_start = 1; }
+[[:space:]] { col_start++; }
 
 <<EOF>>     { return yytokentype::YYEOF; }
 

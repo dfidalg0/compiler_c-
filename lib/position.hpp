@@ -1,5 +1,5 @@
 #ifndef __POSITION__
-#define __POSITION
+#define __POSITION__
 
 class Position {
 private:

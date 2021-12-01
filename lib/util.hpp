@@ -1,16 +1,16 @@
-#ifndef _UTIL_H_
-#define _UTIL_H_
+// #ifndef _UTIL_H_
+// #define _UTIL_H_
 
-#include <parse.hpp>
+// #include <parse.hpp>
 
-extern int lineno;
+// extern int lineno;
 
-TreeNode *newStmtNode(StmtKind);
+// TreeNode *newStmtNode(StmtKind);
 
-TreeNode *newExpNode(ExpKind);
+// TreeNode *newExpNode(ExpKind);
 
-char *copyString(char *);
+// char *copyString(char *);
 
-void printTree(TreeNode *);
+// void printTree(TreeNode *);
 
-#endif
+// #endif
