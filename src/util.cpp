@@ -1,8 +1,8 @@
 #include <iostream>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include "util.h"
+#include <stdlib.hpp>
+#include <ctype.hpp>
+#include <string.hpp>
+#include "util.hpp"
 
 TreeNode *newStmtNode(StmtKind kind)
 {

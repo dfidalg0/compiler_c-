@@ -1,7 +1,7 @@
 %{
 #include <iostream>
-#include <lexer.h>
-#include "../main.tab.h"
+#include <lexer.hpp>
+#include <parser.yy.hpp>
 
 Lexer * current = nullptr;
 
@@ -95,9 +95,7 @@ while       { MAKE_TOKEN(WHILE); }
 \n          { current->line_start++; current->col_start = 1; }
 [[:space:]] { current->col_start++; }
 
-<<EOF>>     { return yytokentype::END_OF_FILE; }
+<<EOF>>     { return yytokentype::YYEOF; }
 
-.           { MAKE_TOKEN(INVALID); }
+.           { MAKE_TOKEN(YYerror); }
 %%
-
-

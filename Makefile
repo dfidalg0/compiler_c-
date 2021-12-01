@@ -2,14 +2,18 @@ all: compiler
 
 compiler: bin/compiler
 
-bin/compiler: main.cpp parser/index lexer/index.cpp lexer/src/*.cpp lexer/lib/*.h | bin
-	g++ -lfl -I lexer/lib main.cpp lexer/index.cpp lexer/src/*.cpp -o bin/compiler
+lexer: src/lexer.yy.cpp
 
-lexer/index.cpp: lexer/main.l
-	flex -o lexer/index.cpp lexer/main.l
+parser: src/parser.yy.cpp lib/parser.yy.hpp
 
-parser/index: parser/main.y
-	bison -d parser/main.y
+bin/compiler: main.cpp src/*.cpp lib/*.hpp | bin
+	g++ -lfl -I lib main.cpp src/*.cpp -o bin/compiler
+
+src/lexer.yy.cpp: main.l
+	flex -o src/lexer.yy.cpp main.l
+
+src/parser.yy.cpp lib/parser.yy.hpp: main.y
+	bison -d main.y -o src/parser.yy.cpp && mv src/parser.yy.hpp lib/
 
 bin:
 	mkdir bin

@@ -2,8 +2,8 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 
-#include "../../lexer/lib/lexer.h"
-#include "../../main.tab.h"
+#include <lexer.hpp>
+#include <parser.yy.hpp>
 
 #define MAXCHILDREN 3
 

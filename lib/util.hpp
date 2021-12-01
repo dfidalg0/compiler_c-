@@ -1,7 +1,7 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
-#include "parse.h"
+#include <parse.hpp>
 
 extern int lineno;
 

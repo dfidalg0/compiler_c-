@@ -1,4 +1,4 @@
-#include <position.h>
+#include <position.hpp>
 
 Position::Position (unsigned line, unsigned col) : _line(line), _col(col) {}
 

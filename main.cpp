@@ -1,7 +1,7 @@
 #include <iostream>
-#include "./lexer/lib/lexer.h"
-#include "./parser/lib/parse.h"
-#include "./parser/lib/util.h"
+#include <lexer.hpp>
+#include <parse.hpp>
+#include <util.hpp>
 
 #define TYPE 1
 
@@ -25,6 +25,6 @@ int main(int argc, char **argv)
             token = lexer.lex();
         }
     }
-    
+
     return 0;
 }

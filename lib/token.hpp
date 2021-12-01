@@ -1,9 +1,9 @@
 #ifndef __TOKEN__
 #define __TOKEN__
 
-#include <position.h>
+#include <position.hpp>
 #include <string>
-#include "../../main.tab.h"
+#include <parser.yy.hpp>
 
 class Token {
 private:

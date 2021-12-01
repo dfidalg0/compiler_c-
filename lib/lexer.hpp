@@ -1,7 +1,7 @@
 #ifndef __LEXER__
 #define __LEXER__
 
-#include <token.h>
+#include <token.hpp>
 #include <sstream>
 
 extern "C" int yylex();

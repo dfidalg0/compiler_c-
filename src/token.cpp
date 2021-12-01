@@ -1,7 +1,7 @@
-#include <token.h>
+#include <token.hpp>
 #include <iostream>
 
-#include "../../main.tab.h"
+#include <parser.yy.hpp>
 
 Token::Token(yytokentype type, Position begin, Position end, std::string text):
     _type(type),
