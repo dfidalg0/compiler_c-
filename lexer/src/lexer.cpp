@@ -17,7 +17,7 @@ Lexer::Lexer(std::string filename) {
 
 Token Lexer::lex() {
 
-    TokenType type = (TokenType) yylex();
+    yytokentype type = (yytokentype) yylex();
 
     auto text = this->text.str();
 

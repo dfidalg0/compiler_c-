@@ -1,2 +1,4 @@
 bin/
 lexer/main.cpp
+*.tab.h
+*.tab.c

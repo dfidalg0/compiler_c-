@@ -1,5 +1,13 @@
 %{
 
+#include "parser/lib/parse.h"
+
+#define YYSTYPE TreeNode *
+static char * savedName; 
+static int savedLineNo; 
+static TreeNode * savedTree; 
+static int yylex(void);
+int yyerror(char *s);
 
 %}
 
@@ -7,17 +15,28 @@
 %token IDENTIFIER NUMBER
 %token ASSIGN EQ NEQ LT LTE GT GTE ADD SUB MUL DIV
 %token LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE COMMA SEMI
-%token INVALID
+%token INVALID END_OF_FILE
 
 %%
 
-programa: declaracao-lista;
+programa: declaracao-lista
+          { savedTree = $1; };
 
-declaracao-lista: declaracao-lista declaracao | 
-                  declaracao;
+declaracao-lista: declaracao-lista declaracao 
+                  {
+                    YYSTYPE t = $1;
+                    if(t != NULL){
+                      while(t->sibling != NULL)
+                        t = t->sibling;
+                      t->sibling = $2;
+                      $$ = $1;      
+                    } else $$ = $2;
+                  } | 
+                  declaracao { $$ = %1; };
 
-declaracao: var-declaracao | 
-            fun-declaracao;
+declaracao: var-declaracao { $$ = $1; } | 
+            fun-declaracao { $$ = $1; } |
+            error { $$ = NULL; };
 
 var-declaracao: tipo-especificador IDENTIFIER SEMI | 
                 tipo-especificador IDENTIFIER LBRACK NUMBER RBRACK SEMI;
@@ -40,18 +59,35 @@ local-declaracoes: local-declaracoes var-declaracao | %empty;
 
 statement-lista: statement-lista statement | %empty;
 
-statement: expressao-decl | 
-           composto-decl | 
-           selecao-decl |
-           iteracao-decl |
-           retorno-decl;
+statement: expressao-decl { $$ = $1; } | 
+           composto-decl { $$ = $1; } | 
+           selecao-decl { $$ = $1; } |
+           iteracao-decl { $$ = $1; } |
+           retorno-decl { $$ = $1; } |
+           error { $$ = NULL; };
 
 expressao-decl: expressao SEMI | SEMI;
 
-selecao-decl: IF LPAREN expressao RPAREN statement |
-              IF LPAREN expressao RPAREN statement ELSE statement;
+selecao-decl: IF LPAREN expressao RPAREN statement 
+              {
+                $$ = newStmtNode(IfK);
+                $$->child[0] = $3;
+                $$->child[1] = $5;   
+              } |
+              IF LPAREN expressao RPAREN statement ELSE statement
+              {
+                $$ = newStmtNode(IfK);
+                $$->child[0] = $3;
+                $$->child[1] = $5;   
+                $$->child[2] = $7;
+              };
 
-iteracao-decl: WHILE LPAREN expressao RPAREN statement;
+iteracao-decl: WHILE LPAREN expressao RPAREN statement
+               {
+                 $$ = newStmtNode(RepeatK);
+                 $$->child[0] = $3;
+                 $$->child[1] = $5;
+               };
 
 retorno-decl: RETURN SEMI | 
               RETURN expressao SEMI;
@@ -67,14 +103,36 @@ simples-expressao: soma-expressao relacional soma-expressao |
 
 relacional: LTE | LT | GT | GTE | EQ | NEQ;
 
-soma-expressao: soma-expressao soma termo |
-                termo;
+soma-expressao: soma-expressao ADD termo 
+                  {
+                    $$ = newExpNode(OpK);
+                    $$->child[0] = $1;
+                    $$->child[1] = $3;
+                    $$->attr.op = ADD;
+                  } 
+                  | soma-expressao SUB termo
+                  {
+                    $$ = newExpNode(OpK);
+                    $$->child[0] = $1;
+                    $$->child[1] = $3;
+                    $$->attr.op = SUB;
+                  } |
+                termo { $$ = $1; };
 
-soma: ADD | SUB;
-
-termo: termo mult fator | fator;
-
-mult: MUL | DIV;
+termo: termo MUL fator 
+       {
+         $$ = newExpNode(Opk);
+         $$->child[0] = $1;
+         $$->child[1] = $3;
+         $$->attr.op = MUL
+       } 
+       | termo DIV fator 
+       {
+         $$ = newExpNode(Opk);
+         $$->child[0] = $1;
+         $$->child[1] = $3;
+         $$->attr.op = DIV
+       } | fator;
 
 fator: LPAREN expressao RPAREN | var | ativacao | NUMBER;
 

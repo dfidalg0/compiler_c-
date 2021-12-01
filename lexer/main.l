@@ -1,6 +1,7 @@
 %{
 #include <iostream>
 #include <lexer.h>
+#include "../main.tab.h"
 
 Lexer * current = nullptr;
 
@@ -12,7 +13,7 @@ void set_token_info() {
 
 #define MAKE_TOKEN($type) \
     set_token_info(); \
-    return TokenType::$type;
+    return yytokentype::$type;
 %}
 
 %x READ_COMMENT
@@ -39,7 +40,7 @@ void set_token_info() {
 
 <READ_COMMENT><<EOF>> {
     BEGIN(INITIAL);
-    return TokenType::INVALID;
+    return yytokentype::INVALID;
 }
 
 if          { MAKE_TOKEN(IF); }
@@ -94,7 +95,7 @@ while       { MAKE_TOKEN(WHILE); }
 \n          { current->line_start++; current->col_start = 1; }
 [[:space:]] { current->col_start++; }
 
-<<EOF>>     { return TokenType::END_OF_FILE; }
+<<EOF>>     { return yytokentype::END_OF_FILE; }
 
 .           { MAKE_TOKEN(INVALID); }
 %%

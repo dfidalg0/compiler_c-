@@ -2,18 +2,18 @@
 #define __TOKEN__
 
 #include <position.h>
-#include <token_types.h>
 #include <string>
+#include "../../main.tab.h"
 
 class Token {
 private:
     Position _begin;
     Position _end;
     std::string _text;
-    TokenType _type;
+    yytokentype _type;
 public:
-    Token(TokenType type, Position begin, Position end, std::string text);
-    TokenType type();
+    Token(yytokentype type, Position begin, Position end, std::string text);
+    yytokentype type();
     Position begin();
     Position end();
     std::string text();

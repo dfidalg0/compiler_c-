@@ -1,7 +1,9 @@
 #include <token.h>
 #include <iostream>
 
-Token::Token(TokenType type, Position begin, Position end, std::string text):
+#include "../../main.tab.h"
+
+Token::Token(yytokentype type, Position begin, Position end, std::string text):
     _type(type),
     _begin(begin),
     _end(end),
@@ -13,37 +15,37 @@ Position Token::end() { return _end; }
 
 std::string Token::text() { return _text; }
 
-TokenType Token::type() { return _type; }
+yytokentype Token::type() { return _type; }
 
 void Token::print(){
     static const std::string types[] = {
         "if",
         "else",
-        "int",
-        "return",
-        "void",
         "while",
+        "return",
+        "int",
+        "void",
         "identifier",
         "number",
-        "add_operator",
-        "sub_operator",
-        "mul_operator",
-        "div_operator",
+        "assign_operator",
+        "eq_operator",
+        "neq_operator",
         "lt_operator",
         "lte_operator",
         "gt_operator",
         "gte_operator",
-        "eq_operator",
-        "neq_operator",
-        "assign_operator",
-        "comma",
-        "semicolon",
+        "add_operator",
+        "sub_operator",
+        "mul_operator",
+        "div_operator",
         "left_parenthesis",
         "right_parenthesis",
         "left_bracket",
         "right_bracket",
         "left_braces",
         "right_braces",
+        "comma",
+        "semicolon",
         "invalid"
     };
 
@@ -51,7 +53,7 @@ void Token::print(){
         << "(" << _begin.line() << "," << _begin.col() << ")"
         << ":"
         << "(" << _end.line() << "," << _end.col() << ") - "
-        << types[_type];
+        << types[_type - yytokentype::IF];
 
     switch(_type){
         case IF:
