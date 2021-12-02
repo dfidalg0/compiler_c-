@@ -97,7 +97,7 @@ param_lista:
             t->sibling = $3;
             $$ = $1;
         }
-        else $$ = $2;
+        else $$ = $3;
     } |
     param {
         $$ = $1;
