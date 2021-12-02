@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string.h>
 #include <tree.hpp>
+#include <vector>
+#include <parser.yy.hpp>
 
 #define MAXCHILDREN 3
 
@@ -47,7 +49,7 @@ char *copyString(std::string s)
     return t;
 }
 
-static int indentNo = 0;
+static int indentNo = -2;
 
 #define INDENT indentNo += 2
 #define UNINDENT indentNo -= 2
@@ -69,37 +71,93 @@ std::string returnExpressionType(ExpressionType type){
     return types[type];
 }
 
+std::string getOperationType(int op) {
+    static const std::string types[] = {
+        "EQ",
+        "NEQ",
+        "LT",
+        "LTE",
+        "GT",
+        "GTE",
+        "ADD",
+        "SUB",
+        "MUL",
+        "DIV"
+    };
+
+    return types[op - yytokentype::EQ];
+}
+
+void printTree(TreeNode * tree, std::string label) {
+    INDENT;
+    printSpaces();
+    std::cout << label << std::endl;
+    printTree(tree);
+    UNINDENT;
+}
+
 void printTree(TreeNode *tree)
 {
     int i;
     INDENT;
-    while (tree != NULL)
-    {
-        printSpaces();
-        if (tree->nodekind == Statement)
-        {
+    while (tree != NULL) {
+        std::vector<std::string> labels;
+
+        if (tree->nodekind == Statement) {
+            if (tree->kind.statement != StatementList) {
+                printSpaces();
+            }
+
             switch (tree->kind.statement)
             {
             case If:
                 std::cout << "If" << std::endl;
+                labels.push_back("- Condition:");
+                labels.push_back("- Body:");
                 break;
             case While:
                 std::cout << "While" << std::endl;
+                labels.push_back("- Condition:");
+                labels.push_back("- Body:");
                 break;
             case Assign:
-                std::cout << "Assign to: " << tree->attr.name << std::endl;
+                std::cout << "Assignment" << std::endl;
+                labels.push_back("- Variable");
+                labels.push_back("- Value:");
+                break;
+            case Return:
+                std::cout << "Return statement";
+                if (tree->child[0]) {
+                    labels.push_back("- Value:");
+                }
+                else {
+                    std::cout << " (void)";
+                }
+                std::cout << std::endl;
+                break;
+            case VariableDeclaration:
+                std::cout << "Variable declaration:" << std::endl;
+                labels.push_back("- Variable:");
+                break;
+            case StatementList:
+                if (!tree->sibling) {
+                    printSpaces();
+                    std::cout << "Empty scope" << std::endl;
+                }
                 break;
             default:
-                std::cout << "Unknown Statement Node Kind" << std::endl;
+                std::cout << "Unknown Statement Node Kind: " << tree->kind.statement << std::endl;
                 break;
             }
         }
-        else if (tree->nodekind == Expression)
-        {
-            switch (tree->kind.expression)
-            {
+        else if (tree->nodekind == Expression) {
+            if (tree->kind.expression != ParamsList) {
+                printSpaces();
+            }
+
+            switch (tree->kind.expression) {
             case Operation:
-                std::cout << "Operation: " << tree->attr.operation << std::endl;
+                std::cout << "Operation: " << getOperationType(tree->attr.operation) << std::endl;
                 break;
             case Constant:
                 std::cout << "Constant: " << tree->attr.val << std::endl;
@@ -110,15 +168,37 @@ void printTree(TreeNode *tree)
             case Array:
                 std::cout << "Array: " << tree->attr.name << ", Type: " << returnExpressionType(tree->type) << std::endl;
                 break;
+            case Function:
+                std::cout << "Function: " << tree->attr.name << ", Type: " << returnExpressionType(tree->type) << std::endl;
+                labels.push_back("- Params:");
+                labels.push_back("- Body:");
+                break;
+            case FunctionCall:
+                std::cout << "FunctionCall: " << tree->attr.name << std::endl;
+                labels.push_back("- Params:");
+                break;
+            case ParamsList:
+                if (!tree->sibling) {
+                    printSpaces();
+                    std::cout << "No params" << std::endl;
+                }
+                break;
             default:
-                std::cout << "Unknown Expression Node Kind" << std::endl;
+                std::cout << "Unknown Expression Node Kind: " << tree->kind.expression << std::endl;
                 break;
             }
         }
         else
             std::cout << "Unknown Node Kind" << std::endl;
-        for (i = 0; i < MAXCHILDREN; i++)
-            printTree(tree->child[i]);
+        for (i = 0; i < MAXCHILDREN; i++) {
+            if (i < labels.size()) {
+                printTree(tree->child[i], labels[i]);
+            }
+            else {
+                printTree(tree->child[i]);
+            }
+        }
+        labels.clear();
         tree = tree->sibling;
     }
     UNINDENT;

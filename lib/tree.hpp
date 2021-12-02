@@ -11,6 +11,7 @@ typedef enum {
     While,
     Assign,
     Return,
+    VariableDeclaration,
     StatementList
 } StatementKind;
 

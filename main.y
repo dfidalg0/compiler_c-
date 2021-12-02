@@ -51,29 +51,31 @@ declaracao:
 
 var_declaracao:
     INT IDENTIFIER SEMI {
-        $$ = createExpressionNode(Identifier, $2->begin().line());
-        $$->attr.name = copyString($2->text());
-        $$->type = Integer;
+        $$ = createStatementNode(VariableDeclaration, $1->begin().line());
+        $$->child[0] = createExpressionNode(Identifier, $2->begin().line());
+        $$->child[0]->attr.name = copyString($2->text());
+        $$->child[0]->type = Integer;
     } |
     INT IDENTIFIER LBRACK NUMBER RBRACK SEMI {
-        $$ = createExpressionNode(Array, $2->begin().line());
-        $$->child[0] = createExpressionNode(Constant, $4->begin().line());
-        $$->child[0]->attr.pos = std::stoi($4->text());
-        $$->attr.name = copyString($2->text());
-        $$->type = Integer;
+        $$ = createStatementNode(VariableDeclaration, $1->begin().line());
+        $$->child[0] = createExpressionNode(Array, $2->begin().line());
+        $$->child[0]->attr.name = copyString($2->text());
+        $$->child[0]->type = Integer;
+        $$->child[0]->child[0] = createExpressionNode(Constant, $4->begin().line());
+        $$->child[0]->child[0]->attr.pos = std::stoi($4->text());
     };
 
 
 fun_declaracao:
     INT IDENTIFIER LPAREN params RPAREN composto_decl {
-        $$ = createExpressionNode(Function, $1->begin().line());
-        $$->attr.name = copyString($1->text());
+        $$ = createExpressionNode(Function, $2->begin().line());
+        $$->attr.name = copyString($2->text());
         $$->child[0] = $4;
         $$->child[1] = $6;
     } |
     VOID IDENTIFIER LPAREN params RPAREN composto_decl {
-        $$ = createExpressionNode(Function, $1->begin().line());
-        $$->attr.name = copyString($1->text());
+        $$ = createExpressionNode(Function, $2->begin().line());
+        $$->attr.name = copyString($2->text());
         $$->child[0] = $4;
         $$->child[1] = $6;
     }
@@ -178,6 +180,7 @@ iteracao_decl:
 retorno_decl:
     RETURN SEMI {
         $$ = createStatementNode(Return, $1->begin().line());
+        $$->child[0] = nullptr;
     } |
     RETURN expressao SEMI {
         $$ = createStatementNode(Return, $1->begin().line());
@@ -286,11 +289,10 @@ fator:
 ativacao: IDENTIFIER LPAREN args RPAREN {
     $$ = createExpressionNode(FunctionCall, $1->begin().line());
 
-    $$->child[0] = createExpressionNode(Identifier, $1->begin().line());
     $$->attr.name = copyString($1->text());
     $$->type = Integer;
 
-    $$->child[1] = $3;
+    $$->child[0] = $3;
 };
 
 args:
