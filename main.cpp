@@ -7,6 +7,7 @@
 // #define TYPE 1
 
 extern FILE * yyin;
+extern TreeNode* getTree();
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -16,12 +17,15 @@ int main(int argc, char **argv) {
 
     yyin = fopen(argv[1], "r");
 
-    auto type = yylex();
+    auto tree = getTree();
+    printTree(tree);
 
-    while (type != yytokentype::YYEOF) {
-        yylval.token->print();
-        type = yylex();
-    }
+    //auto type = yylex();
+
+    //while (type != yytokentype::YYEOF) {
+    //    yylval.token->print();
+    //    type = yylex();
+    //}
 
     return 0;
 }
