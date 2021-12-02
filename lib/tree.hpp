@@ -9,14 +9,19 @@ typedef enum {
 typedef enum {
     If,
     While,
-    Assign
+    Assign,
+    Return,
+    StatementList
 } StatementKind;
 
 typedef enum {
     Operation,
     Constant,
     Identifier,
-    Array
+    Array,
+    Function,
+    FunctionCall,
+    ParamsList
 } ExpressionKind;
 
 typedef enum {
@@ -25,12 +30,12 @@ typedef enum {
     Boolean
 } ExpressionType;
 
-typedef struct treeNode {
-    struct treeNode *child[3];
-    struct treeNode *sibling;
+struct TreeNode {
+    TreeNode *child[3];
+    TreeNode *sibling;
     int line;
     NodeKind nodekind;
-    
+
     union {
         StatementKind statement;
         ExpressionKind expression;
@@ -40,14 +45,15 @@ typedef struct treeNode {
         int operation;
         int val;
         int pos;
-        char* name;
+        char * name;
     } attr;
+
     ExpressionType type;
-} TreeNode;
+};
 
-TreeNode *createStatementNode(StatementKind, int line);
+TreeNode * createStatementNode(StatementKind, int line);
 
-TreeNode *createExpressionNode(ExpressionKind, int line);
+TreeNode * createExpressionNode(ExpressionKind, int line);
 
 void printTree(TreeNode *);
 

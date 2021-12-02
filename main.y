@@ -27,187 +27,283 @@
     fun_declaracao params param_lista statement expressao_decl
     termo fator soma_expressao iteracao_decl selecao_decl
     composto_decl retorno_decl expressao simples_expressao var
-
+    ativacao arg_lista args param statement_lista statements
 %%
 
-programa: declaracao_lista
-          { savedTree = $1; };
+programa: declaracao_lista { savedTree = $1; };
 
-declaracao_lista: declaracao_lista declaracao
-                  {
-                    TreeNode* t = $1;
-                    if(t != NULL){
-                      while(t->sibling != NULL)
-                        t = t->sibling;
-                      t->sibling = $2;
-                      $$ = $1;
-                    } else $$ = $2;
-                  } |
-                  declaracao { $$ = $1; };
+declaracao_lista:
+    declaracao_lista declaracao {
+        TreeNode* t = $1;
+        if(t != NULL){
+            while(t->sibling != NULL)
+                t = t->sibling;
+            t->sibling = $2;
+            $$ = $1;
+        } else $$ = $2;
+    } |
+    declaracao { $$ = $1; };
 
-declaracao: var_declaracao { $$ = $1; } |
-            fun_declaracao { $$ = $1; } |
-            error { $$ = NULL; };
+declaracao:
+    var_declaracao { $$ = $1; } |
+    fun_declaracao { $$ = $1; } |
+    error { $$ = NULL; };
 
-var_declaracao: INT IDENTIFIER SEMI 
-                {
-                  $$ = createExpressionNode(Identifier, $1->begin().line());
-                  $$->attr.name = copyString($2->text());
-                  $$->type = Integer;
-                } |
-                INT IDENTIFIER LBRACK NUMBER RBRACK SEMI {
-                  $$ = createExpressionNode(Array, $1->begin().line());
-                  $$->child[0] = createExpressionNode(Constant, $4->begin().line());
-                  $$->child[0]->attr.pos = stoi($4->text());
-                  $$->attr.name = copyString($2->text());
-                  $$->type = Integer;
-                };
+var_declaracao:
+    INT IDENTIFIER SEMI {
+        $$ = createExpressionNode(Identifier, $2->begin().line());
+        $$->attr.name = copyString($2->text());
+        $$->type = Integer;
+    } |
+    INT IDENTIFIER LBRACK NUMBER RBRACK SEMI {
+        $$ = createExpressionNode(Array, $2->begin().line());
+        $$->child[0] = createExpressionNode(Constant, $4->begin().line());
+        $$->child[0]->attr.pos = std::stoi($4->text());
+        $$->attr.name = copyString($2->text());
+        $$->type = Integer;
+    };
 
 
-fun_declaracao: INT IDENTIFIER LPAREN params RPAREN composto_decl {} |
-                VOID IDENTIFIER LPAREN params RPAREN composto_decl {};
+fun_declaracao:
+    INT IDENTIFIER LPAREN params RPAREN composto_decl {
+        $$ = createExpressionNode(Function, $1->begin().line());
+        $$->attr.name = copyString($1->text());
+        $$->child[0] = $4;
+        $$->child[1] = $6;
+    } |
+    VOID IDENTIFIER LPAREN params RPAREN composto_decl {
+        $$ = createExpressionNode(Function, $1->begin().line());
+        $$->attr.name = copyString($1->text());
+        $$->child[0] = $4;
+        $$->child[1] = $6;
+    }
 
-params: param_lista {} | VOID {};
+params:
+    param_lista {
+        $$ = createExpressionNode(ParamsList, -1);
+        $$->sibling = $1;
+    } |
+    VOID {
+        $$ = createExpressionNode(ParamsList, -1);
+        $$->sibling = nullptr;
+    };
 
-param_lista: param_lista COMMA param {} |
-             param {};
+param_lista:
+    param_lista COMMA param {
+        $$ = $3;
+        $$->sibling = $1;
+    } |
+    param {
+        $$ = $1;
+        $$->sibling = nullptr;
+    };
 
-param: INT IDENTIFIER {} |
-       INT IDENTIFIER LBRACK RBRACK {};
+param:
+    INT IDENTIFIER {
+        $$ = createExpressionNode(Identifier, $2->begin().line());
+        $$->attr.name = copyString($2->text());
+        $$->type = Integer;
+    } |
+    INT IDENTIFIER LBRACK RBRACK {
+        $$ = createExpressionNode(Array, $2->begin().line());
+        $$->attr.name = copyString($2->text());
+        $$->type = Integer;
+    };
 
-composto_decl: LBRACE local_declaracoes statement_lista RBRACE {};
+composto_decl:
+    LBRACE statements RBRACE {
+        $$ = $2;
+    };
 
-local_declaracoes: local_declaracoes var_declaracao {} | %empty;
+statements:
+    statement_lista {
+        $$ = createStatementNode(StatementList, -1);
+        $$->sibling = $1;
+    } |
+    %empty {
+        $$ = createStatementNode(StatementList, -1);
+        $$->sibling = nullptr;
+    }
 
-statement_lista: statement_lista statement {} | %empty;
+statement_lista:
+    statement_lista statement {
+        $$ = $2;
+        $$->sibling = $1;
+    } |
+    statement {
+        $$ = $1;
+    }
 
-statement: expressao_decl { $$ = $1; } |
-           composto_decl { $$ = $1; } |
-           selecao_decl { $$ = $1; } |
-           iteracao_decl { $$ = $1; } |
-           retorno_decl { $$ = $1; } |
-           error { $$ = NULL; };
+statement:
+    var_declaracao { $$ = $1; } |
+    expressao_decl { $$ = $1; } |
+    composto_decl { $$ = $1; } |
+    selecao_decl { $$ = $1; } |
+    iteracao_decl { $$ = $1; } |
+    retorno_decl { $$ = $1; } |
+    error { $$ = NULL; };
 
-expressao_decl: expressao SEMI {} | SEMI {};
+expressao_decl:
+    expressao SEMI { $$ = $1; } |
+    SEMI {};
 
-selecao_decl: IF LPAREN expressao RPAREN statement
-              {
-                $$ = createStatementNode(If, $1->begin().line());
-                $$->child[0] = $3;
-                $$->child[1] = $5;
-              } |
-              IF LPAREN expressao RPAREN statement ELSE statement
-              {
-                $$ = createStatementNode(If, $1->begin().line());
-                $$->child[0] = $3;
-                $$->child[1] = $5;
-                $$->child[2] = $7;
-              };
+selecao_decl:
+    IF LPAREN expressao RPAREN statement {
+        $$ = createStatementNode(If, $1->begin().line());
+        $$->child[0] = $3;
+        $$->child[1] = $5;
+    } |
+    IF LPAREN expressao RPAREN statement ELSE statement {
+        $$ = createStatementNode(If, $1->begin().line());
+        $$->child[0] = $3;
+        $$->child[1] = $5;
+        $$->child[2] = $7;
+    };
 
-iteracao_decl: WHILE LPAREN expressao RPAREN statement
-               {
-                 $$ = createStatementNode(While, $1->begin().line());
-                 $$->child[0] = $3;
-                 $$->child[1] = $5;
-               };
+iteracao_decl:
+    WHILE LPAREN expressao RPAREN statement {
+        $$ = createStatementNode(While, $1->begin().line());
+        $$->child[0] = $3;
+        $$->child[1] = $5;
+    };
 
-retorno_decl: RETURN SEMI {} |
-              RETURN expressao SEMI {};
+retorno_decl:
+    RETURN SEMI {
+        $$ = createStatementNode(Return, $1->begin().line());
+    } |
+    RETURN expressao SEMI {
+        $$ = createStatementNode(Return, $1->begin().line());
+        $$->child[0] = $2;
+    };
 
-expressao: var ASSIGN expressao {
-             $$ = createStatementNode(Assign, $2->begin().line());
-             $$->child[0] = $1;
-             $$->child[1] = $3;
-           } |
-           simples_expressao { $$ = $1; };
+expressao:
+    var ASSIGN expressao {
+        $$ = createStatementNode(Assign, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+    } |
+    simples_expressao { $$ = $1; };
 
-var: IDENTIFIER {
-       $$ = createExpressionNode(Identifier, $1->begin().line());
-       $$->attr.name = copyString($1->text());
-     } |
-     IDENTIFIER LBRACK expressao RBRACK {
+var:
+    IDENTIFIER {
+        $$ = createExpressionNode(Identifier, $1->begin().line());
+        $$->attr.name = copyString($1->text());
+    } |
+    IDENTIFIER LBRACK expressao RBRACK {
        $$ = createExpressionNode(Array, $1->begin().line());
        $$->child[0] = createExpressionNode(Identifier, $1->begin().line());
        $$->child[0]->attr.name = copyString($1->text());
        $$->child[1] = $3;
-     };
+    };
 
-simples_expressao: soma_expressao LTE soma_expressao {
-                     $$ = createExpressionNode(Operation, $2->begin().line());
-                     $$->child[0] = $1;
-                     $$->child[1] = $3;
-                     $$->attr.operation = LTE;
-                   } |
-                   soma_expressao LT soma_expressao {
-                     $$ = createExpressionNode(Operation, $2->begin().line());
-                     $$->child[0] = $1;
-                     $$->child[1] = $3;
-                     $$->attr.operation = LT;
-                   } |
-                   soma_expressao GT soma_expressao {
-                     $$ = createExpressionNode(Operation, $2->begin().line());
-                     $$->child[0] = $1;
-                     $$->child[1] = $3;
-                     $$->attr.operation = GT;
-                   } |
-                   soma_expressao GTE soma_expressao {
-                     $$ = createExpressionNode(Operation, $2->begin().line());
-                     $$->child[0] = $1;
-                     $$->child[1] = $3;
-                     $$->attr.operation = GTE;
-                   } |
-                   soma_expressao EQ soma_expressao {
-                     $$ = createExpressionNode(Operation, $2->begin().line());
-                     $$->child[0] = $1;
-                     $$->child[1] = $3;
-                     $$->attr.operation = EQ;
-                   } |
-                   soma_expressao NEQ soma_expressao {
-                     $$ = createExpressionNode(Operation, $2->begin().line());
-                     $$->child[0] = $1;
-                     $$->child[1] = $3;
-                     $$->attr.operation = NEQ;
-                   } |
-                   soma_expressao { $$ = $1; };
+simples_expressao:
+    soma_expressao LTE soma_expressao {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = LTE;
+    } |
+    soma_expressao LT soma_expressao {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = LT;
+    } |
+    soma_expressao GT soma_expressao {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = GT;
+    } |
+    soma_expressao GTE soma_expressao {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = GTE;
+    } |
+    soma_expressao EQ soma_expressao {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = EQ;
+    } |
+    soma_expressao NEQ soma_expressao {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = NEQ;
+    } |
+    soma_expressao { $$ = $1; };
 
-soma_expressao: soma_expressao ADD termo
-                  {
-                    $$ = createExpressionNode(Operation, $2->begin().line());
-                    $$->child[0] = $1;
-                    $$->child[1] = $3;
-                    $$->attr.operation = ADD;
-                  }
-                  | soma_expressao SUB termo
-                  {
-                    $$ = createExpressionNode(Operation, $2->begin().line());
-                    $$->child[0] = $1;
-                    $$->child[1] = $3;
-                    $$->attr.operation = SUB;
-                  } |
-                termo { $$ = $1; };
+soma_expressao:
+    soma_expressao ADD termo {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = ADD;
+    } |
+    soma_expressao SUB termo {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = SUB;
+    } |
+    termo { $$ = $1; };
 
-termo: termo MUL fator
-       {
-         $$ = createExpressionNode(Operation, $2->begin().line());
-         $$->child[0] = $1;
-         $$->child[1] = $3;
-         $$->attr.operation = MUL;
-       }
-       | termo DIV fator
-       {
-         $$ = createExpressionNode(Operation, $2->begin().line());
-         $$->child[0] = $1;
-         $$->child[1] = $3;
-         $$->attr.operation = DIV;
-       } | fator;
+termo:
+    termo MUL fator {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = MUL;
+    } |
+    termo DIV fator {
+        $$ = createExpressionNode(Operation, $2->begin().line());
+        $$->child[0] = $1;
+        $$->child[1] = $3;
+        $$->attr.operation = DIV;
+    } |
+    fator;
 
-fator: LPAREN expressao RPAREN {} | var {} | ativacao {} | NUMBER {};
+fator:
+    LPAREN expressao RPAREN { $$ = $2; } |
+    var { $$ = $1; } |
+    ativacao { $$ = $1; } |
+    NUMBER {
+        $$ = createExpressionNode(Constant, $1->begin().line());
+        $$->type = Integer;
+        $$->attr.val = std::stoi($1->text());
+    };
 
-ativacao: IDENTIFIER LPAREN args RPAREN {};
+ativacao: IDENTIFIER LPAREN args RPAREN {
+    $$ = createExpressionNode(FunctionCall, $1->begin().line());
 
-args: arg_lista {} | %empty;
+    $$->child[0] = createExpressionNode(Identifier, $1->begin().line());
+    $$->attr.name = copyString($1->text());
+    $$->type = Integer;
 
-arg_lista: arg_lista COMMA expressao {} | expressao {};
+    $$->child[1] = $3;
+};
+
+args:
+    arg_lista {
+        $$ = createExpressionNode(ParamsList, -1);
+        $$->sibling = $1;
+    } |
+    %empty {
+        $$ = createExpressionNode(ParamsList, -1);
+        $$->sibling = nullptr;
+    }
+
+arg_lista:
+    arg_lista COMMA expressao {
+        $$ = $3;
+        $$->sibling = $1;
+    } |
+    expressao {
+        $$ = $1;
+        $$->sibling = nullptr;
+    }
 
 %%
 int yyerror(char const * err) {
@@ -216,6 +312,6 @@ int yyerror(char const * err) {
 };
 
 TreeNode* getTree(){
-  yyparse();
-  return savedTree;
+    yyparse();
+    return savedTree;
 }
