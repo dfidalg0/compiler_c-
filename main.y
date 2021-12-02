@@ -119,10 +119,6 @@ statements:
     statement_lista {
         $$ = createStatementNode(StatementList, -1);
         $$->sibling = $1;
-    } |
-    %empty {
-        $$ = createStatementNode(StatementList, -1);
-        $$->sibling = nullptr;
     }
 
 statement_lista:
@@ -130,8 +126,8 @@ statement_lista:
         $$ = $2;
         $$->sibling = $1;
     } |
-    statement {
-        $$ = $1;
+    %empty {
+        $$ = nullptr;
     }
 
 statement:
