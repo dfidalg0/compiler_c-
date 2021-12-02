@@ -35,8 +35,8 @@ programa: declaracao_lista { savedTree = $1; };
 declaracao_lista:
     declaracao_lista declaracao {
         TreeNode* t = $1;
-        if(t != NULL){
-            while(t->sibling != NULL)
+        if(t != nullptr){
+            while(t->sibling != nullptr)
                 t = t->sibling;
             t->sibling = $2;
             $$ = $1;
@@ -47,7 +47,7 @@ declaracao_lista:
 declaracao:
     var_declaracao { $$ = $1; } |
     fun_declaracao { $$ = $1; } |
-    error { $$ = NULL; };
+    error { $$ = nullptr; };
 
 var_declaracao:
     INT IDENTIFIER SEMI {
@@ -90,8 +90,14 @@ params:
 
 param_lista:
     param_lista COMMA param {
-        $$ = $3;
-        $$->sibling = $1;
+        TreeNode* t = $1;
+        if(t != nullptr){
+            while(t->sibling != nullptr)
+                t = t->sibling;
+            t->sibling = $3;
+            $$ = $1;
+        }
+        else $$ = $2;
     } |
     param {
         $$ = $1;
@@ -123,8 +129,14 @@ statements:
 
 statement_lista:
     statement_lista statement {
-        $$ = $2;
-        $$->sibling = $1;
+        TreeNode* t = $1;
+        if(t != nullptr){
+            while(t->sibling != nullptr)
+                t = t->sibling;
+            t->sibling = $2;
+            $$ = $1;
+        }
+        else $$ = $2;
     } |
     %empty {
         $$ = nullptr;
@@ -137,7 +149,7 @@ statement:
     selecao_decl { $$ = $1; } |
     iteracao_decl { $$ = $1; } |
     retorno_decl { $$ = $1; } |
-    error { $$ = NULL; };
+    error { $$ = nullptr; };
 
 expressao_decl:
     expressao SEMI { $$ = $1; } |
@@ -293,8 +305,14 @@ args:
 
 arg_lista:
     arg_lista COMMA expressao {
-        $$ = $3;
-        $$->sibling = $1;
+        TreeNode* t = $1;
+        if(t != nullptr){
+            while(t->sibling != nullptr)
+                t = t->sibling;
+            t->sibling = $3;
+            $$ = $1;
+        }
+        else $$ = $3;
     } |
     expressao {
         $$ = $1;
