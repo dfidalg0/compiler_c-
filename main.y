@@ -204,6 +204,7 @@ var:
        $$ = createExpressionNode(Array, $1->begin().line());
        $$->child[0] = createExpressionNode(Identifier, $1->begin().line());
        $$->child[0]->attr.name = copyString($1->text());
+       $$->child[0]->type = Integer;
        $$->child[1] = $3;
     };
 
