@@ -1,6 +1,8 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 
+#include <string>
+
 typedef enum {
     Statement,
     Expression
@@ -29,10 +31,6 @@ typedef enum {
     Void,
     Integer
 } ExpressionType;
-
-typedef enum {
-    Integer,
-} VarType;
 
 struct TreeNode {
     TreeNode *child[3];

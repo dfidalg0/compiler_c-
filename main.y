@@ -113,14 +113,20 @@ param_lista:
 
 param:
     INT IDENTIFIER {
-        $$ = createExpressionNode(Identifier, $2->begin().line());
-        $$->attr.name = copyString($2->text());
+        $$ = createStatementNode(VariableDeclaration, $1->begin().line());
         $$->type = Integer;
+        $$->attr.pos = -1;
+        $$->child[0] = createExpressionNode(Identifier, $2->begin().line());
+        $$->child[0]->attr.name = copyString($2->text());
     } |
     INT IDENTIFIER LBRACK RBRACK {
-        $$ = createExpressionNode(Array, $2->begin().line());
-        $$->attr.name = copyString($2->text());
+        $$ = createStatementNode(VariableDeclaration, $1->begin().line());
         $$->type = Integer;
+        $$->attr.pos = 0;
+        $$->child[0] = createExpressionNode(Array, $2->begin().line());
+        $$->child[0]->child[0] = createExpressionNode(Identifier, $2->begin().line());
+        $$->child[0]->child[0]->attr.name = copyString($2->text());
+        $$->child[0]->child[1] = nullptr;
     };
 
 composto_decl:
@@ -167,6 +173,7 @@ selecao_decl:
         $$ = createStatementNode(If, $1->begin().line());
         $$->child[0] = $3;
         $$->child[1] = $5;
+        $$->child[2] = nullptr;
     } |
     IF LPAREN expressao RPAREN statement ELSE statement {
         $$ = createStatementNode(If, $1->begin().line());

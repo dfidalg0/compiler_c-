@@ -5,10 +5,10 @@
 #include <iostream>
 
 struct Variable {
-    Variable(std::string name, VarType type) : name(name), type(type), size(-1) {}
-    Variable(std::string name, VarType type, int size) : name(name), type(type), size(size) {}
+    Variable(std::string name, ExpressionType type) : name(name), type(type), size(-1) {}
+    Variable(std::string name, ExpressionType type, int size) : name(name), type(type), size(size) {}
     std::string name;
-    VarType type;
+    ExpressionType type;
     int size;
 };
 

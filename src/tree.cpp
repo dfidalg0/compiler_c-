@@ -163,12 +163,14 @@ void printTree(TreeNode *tree)
                 std::cout << "Constant: " << tree->attr.val << std::endl;
                 break;
             case Identifier:
-                std::cout << "Id: " << tree->attr.name << " (Type: int)" << std::endl;
+                std::cout << "Id: " << tree->attr.name << std::endl;
                 break;
             case Array:
                 std::cout << "Array: " << std::endl;
                 labels.push_back("- Identifier:");
-                labels.push_back("- Indexer:");
+                if (tree->child[0]) {
+                    labels.push_back("- Indexer:");
+                }
                 break;
             case Function:
                 std::cout << "Function: " << tree->attr.name << ", Type: " << returnExpressionType(tree->type) << std::endl;

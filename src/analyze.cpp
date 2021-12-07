@@ -3,7 +3,16 @@
 Scope * root = new Scope(nullptr);
 
 Scope * current_scope = nullptr;
-Scope * prev_scope = nullptr;
+
+void avance_scope() {
+    current_scope = new Scope(current_scope);
+}
+
+void back_scope() {
+    auto parent = current_scope->parent;
+    delete current_scope;
+    current_scope = parent;
+}
 
 void analyze(TreeNode * tree) {
     if (!tree) {
@@ -11,7 +20,7 @@ void analyze(TreeNode * tree) {
     }
 
     if (!current_scope) {
-        current_scope = prev_scope = root;
+        current_scope = root;
     }
 
     switch (tree->nodekind) {
@@ -30,6 +39,19 @@ void analyze(TreeNode * tree) {
                     break;
                 }
                 case Function: {
+                    avance_scope();
+
+                    auto param = tree->child[0]->sibling;
+
+                    while (param) {
+                        analyze(param);
+                        param = param->sibling;
+                    }
+
+                    analyze(tree->child[1]);
+
+                    back_scope();
+
                     break;
                 }
                 case FunctionCall: {
@@ -80,25 +102,58 @@ void analyze(TreeNode * tree) {
                         ? var->child[0]->attr.name
                         : var->attr.name;
 
-                    auto variables = current_scope->variables;
+                    bool found = false;
 
-                    if (variables.find(name) == variables.end()) {
+                    auto it = current_scope;
+
+                    while (!found && it) {
+                        auto variables = it->variables;
+
+                        // Buscamos a variável no escopo atual
+                        if (variables.find(name) != variables.end()) {
+                            found = true;
+                        }
+                        // Caso contrário, buscamos na hierarquia de escopos
+                        else {
+                            it = it->parent;
+                        }
+                    }
+
+                    if (!found) {
                         std::cerr << "Error: variable " << name << " not declared" << std::endl;
                     }
 
                     break;
                 }
                 case If: {
+                    avance_scope();
+
+                    analyze(tree->child[1]);
+
+                    back_scope();
+
+                    if (tree->child[2]) {
+                        avance_scope();
+                        analyze(tree->child[2]);
+                        back_scope();
+                    }
+
                     break;
                 }
                 case While: {
+                    avance_scope();
+
+                    analyze(tree->child[1]);
+
+                    back_scope();
+
                     break;
                 }
                 case Return: {
                     break;
                 }
                 case StatementList: {
-                    auto child = tree->child[0];
+                    auto child = tree->child[0]->sibling;
 
                     while (child) {
                         analyze(child);
