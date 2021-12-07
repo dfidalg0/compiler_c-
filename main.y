@@ -8,6 +8,8 @@
     static TreeNode * savedTree;
     int yyerror(char const *);
 
+    TreeNode* getTree();
+
     extern "C" int yylex();
 }
 
