@@ -54,17 +54,20 @@ declaracao:
 var_declaracao:
     INT IDENTIFIER SEMI {
         $$ = createStatementNode(VariableDeclaration, $1->begin().line());
+        $$->type = Integer;
+        $$->attr.pos = -1;
         $$->child[0] = createExpressionNode(Identifier, $2->begin().line());
         $$->child[0]->attr.name = copyString($2->text());
-        $$->child[0]->type = Integer;
     } |
     INT IDENTIFIER LBRACK NUMBER RBRACK SEMI {
         $$ = createStatementNode(VariableDeclaration, $1->begin().line());
+        $$->type = Integer;
+        $$->attr.pos = std::stoi($4->text());
         $$->child[0] = createExpressionNode(Array, $2->begin().line());
-        $$->child[0]->attr.name = copyString($2->text());
-        $$->child[0]->type = Integer;
-        $$->child[0]->child[0] = createExpressionNode(Constant, $4->begin().line());
-        $$->child[0]->child[0]->attr.pos = std::stoi($4->text());
+        $$->child[0]->child[0] = createExpressionNode(Identifier, $2->begin().line());
+        $$->child[0]->child[0]->attr.name = copyString($2->text());
+        $$->child[0]->child[1] = createExpressionNode(Constant, $4->begin().line());
+        $$->child[0]->child[1]->attr.val = std::stoi($4->text());
     };
 
 

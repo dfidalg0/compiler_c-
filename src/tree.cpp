@@ -136,7 +136,7 @@ void printTree(TreeNode *tree)
                 std::cout << std::endl;
                 break;
             case VariableDeclaration:
-                std::cout << "Variable declaration:" << std::endl;
+                std::cout << "Variable declaration (Type: " << returnExpressionType(tree->type) << ")" << std::endl;
                 labels.push_back("- Variable:");
                 break;
             case StatementList:
@@ -163,7 +163,7 @@ void printTree(TreeNode *tree)
                 std::cout << "Constant: " << tree->attr.val << std::endl;
                 break;
             case Identifier:
-                std::cout << "Id: " << tree->attr.name << ", Type: " << returnExpressionType(tree->type) << std::endl;
+                std::cout << "Id: " << tree->attr.name << " (Type: int)" << std::endl;
                 break;
             case Array:
                 std::cout << "Array: " << std::endl;
