@@ -13,10 +13,11 @@ struct Variable {
 };
 
 struct Fn {
-    Fn(std::string name, ExpressionType type) : name(name), type(type) {}
+    Fn(std::string name, std::vector<Variable *> params, ExpressionType type):
+        name(name), return_type(type), params(params) {}
     std::string name;
-    ExpressionType type;
-    std::vector<Variable> args;
+    std::vector<Variable *> params;
+    ExpressionType return_type;
 };
 
 struct Scope {

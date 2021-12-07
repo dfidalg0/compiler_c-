@@ -4,6 +4,8 @@ Scope * root = new Scope(nullptr);
 
 Scope * current_scope = nullptr;
 
+Scope * nearest_fn_scope = nullptr;
+
 void avance_scope() {
     current_scope = new Scope(current_scope);
 }
@@ -14,8 +16,21 @@ void back_scope() {
     current_scope = parent;
 }
 
+Variable * find_variable(const std::string & name) {
+    auto scope = current_scope;
+    while (scope != nullptr) {
+        auto it = scope->variables.find(name);
+        if (it != scope->variables.end()) {
+            return it->second;
+        }
+        scope = scope->parent;
+    }
+    return nullptr;
+}
+
 void analyze(TreeNode * tree) {
     if (!tree) {
+        std::cout << "analyze: tree is null" << std::endl;
         return;
     }
 
@@ -27,29 +42,103 @@ void analyze(TreeNode * tree) {
         case Expression: {
             switch (tree->kind.expression) {
                 case Operation: {
+                    analyze(tree->child[0]);
+                    analyze(tree->child[1]);
                     break;
                 }
                 case Constant: {
                     break;
                 }
                 case Identifier: {
+                    auto name = tree->attr.name;
+
+                    auto var = find_variable(name);
+
+                    if (!var) {
+                        auto line = tree->line;
+
+                        std::cerr << "[Line " << line << "] Variable " << name << " not declared" << std::endl;
+                    }
+
                     break;
                 }
                 case Array: {
+                    auto name = tree->child[0]->attr.name;
+
+                    auto var = find_variable(name);
+
+                    if (!var) {
+                        auto line = tree->line;
+
+                        std::cerr << "[Line " << line << "] Variable " << name << " not declared" << std::endl;
+                    }
+
                     break;
                 }
                 case Function: {
+                    auto name = tree->attr.name;
+
+                    auto type = tree->type;
+
+                    auto & functions = root->functions;
+
                     avance_scope();
 
+                    nearest_fn_scope = current_scope;
+
                     analyze(tree->child[0]);
+
+                    std::vector<Variable *> variables;
+
+                    for (auto it : current_scope->variables) {
+                        variables.push_back(it.second);
+                    }
+
+                    if (functions.find(name) != functions.end()) {
+                        auto line = tree->line;
+
+                        std::cerr << "[Line " << line << "] Function " << name << " already declared" << std::endl;
+                    } else {
+                        functions[name] = new Fn(name, variables, type);
+                    }
 
                     analyze(tree->child[1]);
 
                     back_scope();
 
+                    nearest_fn_scope = nullptr;
+
                     break;
                 }
                 case FunctionCall: {
+                    auto name = tree->attr.name;
+
+                    auto & functions = root->functions;
+
+                    if (functions.find(name) == functions.end()) {
+                        auto line = tree->line;
+
+                        std::cerr << "[Line " << line << "] Function " << name << " not declared" << std::endl;
+                    }
+                    else {
+                        auto fn = functions[name];
+
+                        auto args_passed = 0;
+                        auto t = tree->child[0];
+                        while (t->sibling) {
+                            args_passed++;
+                            t = t->sibling;
+                        }
+
+                        if (fn->params.size() != args_passed) {
+                            auto line = tree->line;
+
+                            std::cerr << "[Line " << line << "] Function " << name << " called with wrong number of arguments" << std::endl;
+                        }
+                    }
+
+                    analyze(tree->child[0]);
+
                     break;
                 }
                 case ParamsList: {
@@ -89,7 +178,9 @@ void analyze(TreeNode * tree) {
                     auto & variables = current_scope->variables;
 
                     if (variables.find(var->name) != variables.end()) {
-                        std::cerr << "Error: variable " << var->name << " already declared" << std::endl;
+                        auto line = tree->line;
+
+                        std::cerr << "[Line " << line << "] Error: variable " << var->name << " already declared" << std::endl;
                     }
                     else {
                         variables[var->name] = var;
@@ -98,32 +189,21 @@ void analyze(TreeNode * tree) {
                     break;
                 }
                 case Assign: {
-                    auto var = tree->child[0];
+                    auto var_node = tree->child[0];
 
-                    std::string name = var->kind.expression == Array
-                        ? var->child[0]->attr.name
-                        : var->attr.name;
+                    std::string name = var_node->kind.expression == Array
+                        ? var_node->child[0]->attr.name
+                        : var_node->attr.name;
 
-                    bool found = false;
+                    auto var = find_variable(name);
 
-                    auto it = current_scope;
+                    if (!var) {
+                        auto line = tree->line;
 
-                    while (!found && it) {
-                        auto & variables = it->variables;
-
-                        // Buscamos a variável no escopo atual
-                        if (variables.find(name) != variables.end()) {
-                            found = true;
-                        }
-                        // Caso contrário, buscamos na hierarquia de escopos
-                        else {
-                            it = it->parent;
-                        }
+                        std::cerr << "[Line " << line << "] Error: variable " << name << " not declared" << std::endl;
                     }
 
-                    if (!found) {
-                        std::cerr << "Error: variable " << name << " not declared" << std::endl;
-                    }
+                    analyze(tree->child[1]);
 
                     break;
                 }
@@ -152,6 +232,15 @@ void analyze(TreeNode * tree) {
                     break;
                 }
                 case Return: {
+                    if (!nearest_fn_scope) {
+                        auto line = tree->line;
+
+                        std::cerr << "[Line " << line << "] Error: return outside function" << std::endl;
+                    }
+                    else {
+                        analyze(tree->child[0]);
+                    }
+
                     break;
                 }
                 case StatementList: {

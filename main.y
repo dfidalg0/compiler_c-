@@ -32,7 +32,11 @@
     ativacao arg_lista args param statement_lista statements
 %%
 
-programa: declaracao_lista { savedTree = $1; };
+programa: declaracao_lista {
+    $$ = createStatementNode(StatementList, -1);
+    $$->sibling = $1;
+    savedTree = $$;
+};
 
 declaracao_lista:
     declaracao_lista declaracao {
