@@ -84,7 +84,7 @@ void analyze(TreeNode * tree) {
                         var = new Variable(name, type);
                     }
 
-                    auto variables = current_scope->variables;
+                    auto & variables = current_scope->variables;
 
                     if (variables.find(var->name) != variables.end()) {
                         std::cerr << "Error: variable " << var->name << " already declared" << std::endl;
@@ -107,7 +107,7 @@ void analyze(TreeNode * tree) {
                     auto it = current_scope;
 
                     while (!found && it) {
-                        auto variables = it->variables;
+                        auto & variables = it->variables;
 
                         // Buscamos a variável no escopo atual
                         if (variables.find(name) != variables.end()) {
