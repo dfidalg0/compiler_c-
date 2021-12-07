@@ -27,9 +27,12 @@ typedef enum {
 
 typedef enum {
     Void,
-    Integer,
-    Boolean
+    Integer
 } ExpressionType;
+
+typedef enum {
+    Integer,
+} VarType;
 
 struct TreeNode {
     TreeNode *child[3];
