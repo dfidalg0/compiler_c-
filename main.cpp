@@ -1,5 +1,6 @@
 #include <iostream>
 #include <parser.yy.hpp>
+#include <analyze.hpp>
 
 extern FILE * yyin;
 
@@ -14,6 +15,8 @@ int main(int argc, char **argv) {
 
     auto tree = getTree();
     printTree(tree);
+
+    analyze(tree);
 
     return 0;
 }

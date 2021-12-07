@@ -153,11 +153,11 @@ void analyze(TreeNode * tree) {
                     break;
                 }
                 case StatementList: {
-                    auto child = tree->child[0]->sibling;
+                    auto stmt = tree->sibling;
 
-                    while (child) {
-                        analyze(child);
-                        child = child->sibling;
+                    while (stmt) {
+                        analyze(stmt);
+                        stmt = stmt->sibling;
                     }
 
                     break;
