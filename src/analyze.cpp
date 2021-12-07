@@ -41,12 +41,7 @@ void analyze(TreeNode * tree) {
                 case Function: {
                     avance_scope();
 
-                    auto param = tree->child[0]->sibling;
-
-                    while (param) {
-                        analyze(param);
-                        param = param->sibling;
-                    }
+                    analyze(tree->child[0]);
 
                     analyze(tree->child[1]);
 
@@ -58,6 +53,13 @@ void analyze(TreeNode * tree) {
                     break;
                 }
                 case ParamsList: {
+                    auto stmt = tree->sibling;
+
+                    while (stmt) {
+                        analyze(stmt);
+                        stmt = stmt->sibling;
+                    }
+
                     break;
                 }
             }
