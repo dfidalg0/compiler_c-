@@ -138,11 +138,17 @@ Code * _analyze(TreeNode * tree) {
                     auto t = args;
 
                     while (t->next) {
+                        t = t->next;
                         args_passed++;
+                    }
 
+                    auto it = 0;
+
+                    while (t->next && fn->params.size() < it) {
+                        auto param = fn->params[it];
                         auto p = t->next;
 
-                        auto param = fn->params[args_passed - 1];
+                        it++;
 
                         if (param->type != p->type || p->is_array && param->size < 0) {
                             auto line = tree->line;
@@ -152,7 +158,7 @@ Code * _analyze(TreeNode * tree) {
                             return new Code(Void);
                         }
 
-                        t = t->next;
+                        t = p;
                     }
 
                     if (fn->params.size() != args_passed) {
