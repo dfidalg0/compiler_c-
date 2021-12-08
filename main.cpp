@@ -24,10 +24,17 @@ int main(int argc, char **argv) {
 
     auto tree = getTree();
     if(tree) {
+        std::cout << "Árvore sintática:\n\n";
+        printTree(tree);
+
         auto code = analyze(tree);
+
         if (code) {
-            std::cout << "Código intermediário:\n\n";
+            std::cout << "\n\nCódigo intermediário:\n\n";
             std::cout << code->stmt << std::endl;
+        }
+        else {
+            std::cout << "Código intermediário não gerado devido a erros" << std::endl;
         }
     }
 
