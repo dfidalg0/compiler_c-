@@ -397,7 +397,7 @@ Code *analyze(TreeNode *tree)
 
 void printTableElements(Scope *scope)
 {
-    if (!scope->variables.empty() || scope->functions.empty())
+    if (!(scope->variables.empty() && scope->functions.empty()))
     {
         std::cout << "-- Scope: " << scope->scope_name << std::endl;
         if (scope->variables.size() > 0)
