@@ -28,12 +28,7 @@ Variable * find_variable(const std::string & name) {
     return nullptr;
 }
 
-void analyze(TreeNode * tree) {
-    if (!tree) {
-        std::cout << "analyze: tree is null" << std::endl;
-        return;
-    }
-
+void analyzeHelper(TreeNode * tree) {
     if (!current_scope) {
         current_scope = root;
     }
@@ -42,8 +37,8 @@ void analyze(TreeNode * tree) {
         case Expression: {
             switch (tree->kind.expression) {
                 case Operation: {
-                    analyze(tree->child[0]);
-                    analyze(tree->child[1]);
+                    analyzeHelper(tree->child[0]);
+                    analyzeHelper(tree->child[1]);
                     break;
                 }
                 case Constant: {
@@ -86,7 +81,7 @@ void analyze(TreeNode * tree) {
 
                     nearest_fn_scope = current_scope;
 
-                    analyze(tree->child[0]);
+                    analyzeHelper(tree->child[0]);
 
                     std::vector<Variable *> variables;
 
@@ -102,7 +97,7 @@ void analyze(TreeNode * tree) {
                         functions[name] = new Fn(name, variables, type);
                     }
 
-                    analyze(tree->child[1]);
+                    analyzeHelper(tree->child[1]);
 
                     back_scope();
 
@@ -137,7 +132,7 @@ void analyze(TreeNode * tree) {
                         }
                     }
 
-                    analyze(tree->child[0]);
+                    analyzeHelper(tree->child[0]);
 
                     break;
                 }
@@ -145,7 +140,7 @@ void analyze(TreeNode * tree) {
                     auto stmt = tree->sibling;
 
                     while (stmt) {
-                        analyze(stmt);
+                        analyzeHelper(stmt);
                         stmt = stmt->sibling;
                     }
 
@@ -209,20 +204,20 @@ void analyze(TreeNode * tree) {
                         std::cerr << "[Line " << line << "] Error: variable " << name << " not declared" << std::endl;
                     }
 
-                    analyze(tree->child[1]);
+                    analyzeHelper(tree->child[1]);
 
                     break;
                 }
                 case If: {
                     avance_scope();
 
-                    analyze(tree->child[1]);
+                    analyzeHelper(tree->child[1]);
 
                     back_scope();
 
                     if (tree->child[2]) {
                         avance_scope();
-                        analyze(tree->child[2]);
+                        analyzeHelper(tree->child[2]);
                         back_scope();
                     }
 
@@ -231,7 +226,7 @@ void analyze(TreeNode * tree) {
                 case While: {
                     avance_scope();
 
-                    analyze(tree->child[1]);
+                    analyzeHelper(tree->child[1]);
 
                     back_scope();
 
@@ -244,7 +239,7 @@ void analyze(TreeNode * tree) {
                         std::cerr << "[Line " << line << "] Error: return outside function" << std::endl;
                     }
                     else {
-                        analyze(tree->child[0]);
+                        analyzeHelper(tree->child[0]);
                     }
 
                     break;
@@ -253,7 +248,7 @@ void analyze(TreeNode * tree) {
                     auto stmt = tree->sibling;
 
                     while (stmt) {
-                        analyze(stmt);
+                        analyzeHelper(stmt);
                         stmt = stmt->sibling;
                     }
 
@@ -263,4 +258,17 @@ void analyze(TreeNode * tree) {
             break;
         }
     }
+}
+
+void analyze(TreeNode * tree) {
+    if (!tree) {
+        std::cout << "analyze: tree is null" << std::endl;
+        return;
+    }
+
+   analyzeHelper(tree);
+   auto it = root->functions.find("main");
+   if(it == root->functions.end()){
+       std::cout << "Error: Function main not declared" << std::endl;
+   }
 }
