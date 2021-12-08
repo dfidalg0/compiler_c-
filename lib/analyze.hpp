@@ -15,9 +15,13 @@ struct Variable {
 struct Code {
     Code(ExpressionType type) : type(type), is_array(false), next(nullptr) {}
     Code(ExpressionType type, bool is_array) : type(type), is_array(is_array), next(nullptr) {}
+
     ExpressionType type;
     bool is_array;
     Code * next;
+
+    std::string stmt;
+    std::string reg;
 };
 
 struct Fn {

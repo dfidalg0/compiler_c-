@@ -61,4 +61,6 @@ void printTree(TreeNode *);
 
 char *copyString(std::string s);
 
+std::string getOperationType(int op);
+
 #endif
