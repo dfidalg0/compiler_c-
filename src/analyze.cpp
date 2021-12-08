@@ -405,7 +405,11 @@ void printTableElements(Scope *scope)
 
         for (auto it = scope->variables.begin(); it != scope->variables.end(); it++)
         {
-            std::cout << it->first << " / type: " << returnExpressionType(it->second->type) << std::endl;
+            std::cout << it->first << " / type: " << returnExpressionType(it->second->type);
+            if(it->second->size != -1){
+                std::cout << " / size: 10";
+            }
+            std::cout << std::endl;
         }
 
         if (scope->functions.size() > 0)
