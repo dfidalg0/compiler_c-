@@ -73,16 +73,16 @@ std::string returnExpressionType(ExpressionType type){
 
 std::string getOperationType(int op) {
     static const std::string types[] = {
-        "EQ",
-        "NEQ",
-        "LT",
-        "LTE",
-        "GT",
-        "GTE",
-        "ADD",
-        "SUB",
-        "MUL",
-        "DIV"
+        "==",
+        "!=",
+        "<",
+        "<=",
+        ">",
+        ">=",
+        "+",
+        "-",
+        "*",
+        "/",
     };
 
     return types[op - yytokentype::EQ];
