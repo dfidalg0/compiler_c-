@@ -54,8 +54,8 @@ declaracao_lista:
 declaracao:
     var_declaracao { $$ = $1; } |
     fun_declaracao { $$ = $1; } |
-    error { 
-        $$ = nullptr; 
+    error {
+        $$ = nullptr;
     };
 
 var_declaracao:
@@ -98,12 +98,14 @@ fun_declaracao:
     INT IDENTIFIER LPAREN params RPAREN composto_decl {
         $$ = createExpressionNode(Function, $2->begin().line());
         $$->attr.name = copyString($2->text());
+        $$->type = Integer;
         $$->child[0] = $4;
         $$->child[1] = $6;
     } |
     VOID IDENTIFIER LPAREN params RPAREN composto_decl {
         $$ = createExpressionNode(Function, $2->begin().line());
         $$->attr.name = copyString($2->text());
+        $$->type = Void;
         $$->child[0] = $4;
         $$->child[1] = $6;
     }
@@ -325,7 +327,6 @@ ativacao: IDENTIFIER LPAREN args RPAREN {
     $$ = createExpressionNode(FunctionCall, $1->begin().line());
 
     $$->attr.name = copyString($1->text());
-    $$->type = Integer;
 
     $$->child[0] = $3;
 };

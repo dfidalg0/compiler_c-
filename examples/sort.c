@@ -1,3 +1,5 @@
+/* int minloc(int a[], int i, int high) { return 0; } */
+
 /**
  * Comentário de várias linhas
  */

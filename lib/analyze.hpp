@@ -12,6 +12,14 @@ struct Variable {
     int size;
 };
 
+struct Code {
+    Code(ExpressionType type) : type(type), is_array(false), next(nullptr) {}
+    Code(ExpressionType type, bool is_array) : type(type), is_array(is_array), next(nullptr) {}
+    ExpressionType type;
+    bool is_array;
+    Code * next;
+};
+
 struct Fn {
     Fn(std::string name, std::vector<Variable *> params, ExpressionType type):
         name(name), return_type(type), params(params) {}
@@ -27,4 +35,4 @@ struct Scope {
     std::map<std::string, Fn *> functions;
 };
 
-void analyze(TreeNode *tree);
+Code * analyze(TreeNode *tree);
