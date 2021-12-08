@@ -1,1 +1,9 @@
-void x(void){ int a; a = 2; }
+void exemplo(void){
+    int a;
+    a = 0;
+}
+
+void main(void){
+    int a;
+    a = exemplo();
+}

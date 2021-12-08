@@ -161,6 +161,12 @@ void analyze(TreeNode * tree) {
 
                     Variable * var;
 
+                    if(tree->type == Void){
+                        auto line = tree->line;
+
+                        std::cerr << "[Line " << line << "] Error: Invalid declaration, void can only be used for functions" << std::endl;
+                    }
+
                     if (child->kind.expression == Array) {
                         auto size = child->attr.pos;
                         auto id = child->child[0];

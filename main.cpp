@@ -23,10 +23,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
-        auto tree = getTree();
-    printTree(tree);
-
-    analyze(tree);
+    auto tree = getTree();
+    if(tree) analyze(tree);
 
     return 0;
 }
