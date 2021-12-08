@@ -204,6 +204,15 @@ void analyzeHelper(TreeNode * tree) {
                         std::cerr << "[Line " << line << "] Error: variable " << name << " not declared" << std::endl;
                     }
 
+                    if(tree->child[1]->nodekind == Expression && tree->child[1]->kind.expression == FunctionCall){
+                        std::string funName = tree->child[1]->attr.name;
+                        auto fun = root->functions.find(funName);
+                        if(fun != root->functions.end() && fun->second->return_type != Integer){
+                            auto line = tree->line;
+
+                            std::cerr << "[Line " << line << "] Error: wrong attribution, types of '" << name << "' and '" << funName << "' don't match " << std::endl;
+                        }
+                    }
                     analyzeHelper(tree->child[1]);
 
                     break;
