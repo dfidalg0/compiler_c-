@@ -1,8 +1,10 @@
 #include <iostream>
 #include <parser.yy.hpp>
 #include <analyze.hpp>
+#include <globals.hpp>
 
 extern FILE *yyin;
+int line_start = 1, line_end = 1, col_start = 1, col_end = 1;
 
 int main(int argc, char **argv)
 {
@@ -21,7 +23,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    auto tree = getTree();
+        auto tree = getTree();
     printTree(tree);
 
     analyze(tree);

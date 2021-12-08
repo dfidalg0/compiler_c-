@@ -1,4 +1,1 @@
-int x;
-int y[10];
-int z;
-z = x + y;
+void x(void){ int a; a = 2; }

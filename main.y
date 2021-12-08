@@ -4,6 +4,7 @@
     #include <iostream>
     #include <token.hpp>
     #include <tree.hpp>
+    #include <globals.hpp>
 
     static TreeNode * savedTree;
     int yyerror(char const *);
@@ -53,7 +54,9 @@ declaracao_lista:
 declaracao:
     var_declaracao { $$ = $1; } |
     fun_declaracao { $$ = $1; } |
-    error { $$ = nullptr; };
+    error { 
+        $$ = nullptr; 
+    };
 
 var_declaracao:
     INT IDENTIFIER SEMI {
@@ -340,7 +343,8 @@ arg_lista:
 
 %%
 int yyerror(char const * err) {
-    std::cerr << err << std::endl;
+    std::cerr << "Syntax error at line " << line_start << " column "
+        << col_start << std::endl;
     return 0;
 };
 

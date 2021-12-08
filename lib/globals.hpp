@@ -1,0 +1,1 @@
+extern int line_start, line_end, col_start, col_end;

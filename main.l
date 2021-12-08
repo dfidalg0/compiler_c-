@@ -2,8 +2,7 @@
 #include <iostream>
 #include <position.hpp>
 #include <parser.yy.hpp>
-
-int line_start = 1, line_end = 1, col_start = 1, col_end = 1;
+#include <globals.hpp>
 
 void set_token_info(yytokentype type) {
     line_end = line_start;
