@@ -12,6 +12,7 @@
     TreeNode* getTree();
 
     extern "C" int yylex();
+    extern char* yytext;
 }
 
 %union {
@@ -360,7 +361,7 @@ arg_lista:
 %%
 int yyerror(char const * err) {
     std::cerr << "Syntax error at line " << line_start << " column "
-        << col_start << std::endl;
+        << col_start << ", token '" << yytext << "'" << std::endl;
     return 0;
 };
 

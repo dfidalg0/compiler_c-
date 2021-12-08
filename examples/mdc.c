@@ -9,7 +9,5 @@ int gdc (int u, int v)
 void main(void)
 {
    int r[2];
-   r[0] = input();
-   r[1] = input();
-   output(gdc(r[0], r[1]));
+   gdc(r[0]);
 }

@@ -4,7 +4,9 @@
 #include <globals.hpp>
 
 extern FILE *yyin;
+
 int line_start = 1, line_end = 1, col_start = 1, col_end = 1;
+FILE *table_simbols;
 
 int main(int argc, char **argv)
 {
@@ -26,5 +28,7 @@ int main(int argc, char **argv)
     auto tree = getTree();
     if(tree) analyze(tree);
 
+
+    printSymbolsTable();
     return 0;
 }

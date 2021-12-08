@@ -1,9 +1,10 @@
-void exemplo(void){
-    int var;
-    var = 2;
-}
-
-void main(void){
+int main(void){
     int a;
-    a = exemplo();
+    int b;
+
+    int a;
+    void b(int c[]){
+        c[0] = 1;
+    };
+    return 0;
 }

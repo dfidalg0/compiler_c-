@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <stack>
 
 struct Variable {
     Variable(std::string name, ExpressionType type) : name(name), type(type), size(-1) {}
@@ -33,6 +34,8 @@ struct Scope {
     Scope *parent;
     std::map<std::string, Variable *> variables;
     std::map<std::string, Fn *> functions;
+    char* scope_name;
 };
 
 Code * analyze(TreeNode *tree);
+void printSymbolsTable();
